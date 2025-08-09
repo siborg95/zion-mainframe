@@ -1,16 +1,22 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User'); // make sure this path is correct
+const bcrypt = require('bcryptjs');
+const User = require('../models/User');
 
-// Reset admin password
+// POST /auth/reset-admin — create or update the administrator user
 router.post('/reset-admin', async (req, res) => {
   try {
     const { password } = req.body;
-    if (!password) return res.status(400).json({ success: false, message: 'Password required' });
+    if (!password) {
+      return res.status(400).json({ success: false, message: 'Password required' });
+    }
 
     let user = await User.findOne({ username: 'administrator' });
-    if (!user) user = new User({ username: 'administrator', password });
-    else user.password = password;
+    if (!user) {
+      user = new User({ username: 'administrator', password });
+    } else {
+      user.password = password;
+    }
 
     await user.save();
     res.json({ success: true, message: 'Admin password reset successfully' });
@@ -19,9 +25,27 @@ router.post('/reset-admin', async (req, res) => {
   }
 });
 
-// Health check endpoint
-router.get('/health', (req, res) => {
+// GET /auth/health — simple health check
+router.get('/health', (_req, res) => {
   res.json({ success: true, status: 'Backend is running' });
 });
 
+// POST /auth/login — verify credentials
+router.post('/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    const user = await User.findOne({ username });
+    if (!user) return res.status(401).json({ success: false, message: 'Invalid credentials' });
+
+    const ok = await bcrypt.compare(password, user.password);
+    if (!ok) return res.status(401).json({ success: false, message: 'Invalid credentials' });
+
+    res.json({ success: true, username: user.username });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
 module.exports = router;
+
