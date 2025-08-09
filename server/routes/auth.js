@@ -1,6 +1,8 @@
-const router = require('express').Router();
-const User = require('../models/User');
+const express = require('express');
+const router = express.Router();
+const User = require('../models/User'); // make sure this path is correct
 
+// Reset admin password
 router.post('/reset-admin', async (req, res) => {
   try {
     const { password } = req.body;
@@ -15,6 +17,11 @@ router.post('/reset-admin', async (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
+});
+
+// Health check endpoint
+router.get('/health', (req, res) => {
+  res.json({ success: true, status: 'Backend is running' });
 });
 
 module.exports = router;
