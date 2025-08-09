@@ -1,9 +1,9 @@
-
-<template>
-  <div style="font-size: 24px; padding: 50px;">
-    ✅ App.vue is working — no router
-  </div>
+﻿<template>
+  <h1>Zion Mainframe</h1>
+  <p>Frontend is live.</p>
 </template>
-
 <script setup>
 </script>
+<style>
+  body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+</style>
