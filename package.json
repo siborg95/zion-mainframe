@@ -7,14 +7,15 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "vite preview --host --port $PORT"
+    "start": "serve -s dist -l $PORT"
   },
   "dependencies": {
     "vue": "^3.4.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.1",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "serve": "^14.2.0"
   },
   "engines": { "node": ">=18" }
 }
