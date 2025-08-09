@@ -1,8 +1,7 @@
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-
-export default defineConfig({
-  plugins: [vue()],
-  root: '.',         // keep explicit
-  publicDir: 'public'
-})
+export default {
+  server: {
+    preview: {
+      allowedHosts: ['oracle-front-end-production.up.railway.app']
+    }
+  }
+};
