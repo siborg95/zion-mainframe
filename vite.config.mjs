@@ -1,7 +1,10 @@
 export default {
   server: {
-    preview: {
-      allowedHosts: ['oracle-front-end-production.up.railway.app']
-    }
+    host: true,
+    allowedHosts: ['oracle-front-end-production.up.railway.app']
+  },
+  preview: {
+    host: true,
+    allowedHosts: ['oracle-front-end-production.up.railway.app']
   }
 };
