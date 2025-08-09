@@ -46,6 +46,18 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ success: false, error: e.message });
   }
 });
+// DEBUG: list available auth routes
+router.get('/routes', (req, res) => {
+  const routes = [];
+  router.stack.forEach((layer) => {
+    if (layer.route) {
+      const path = layer.route.path;
+      const methods = Object.keys(layer.route.methods).join(',').toUpperCase();
+      routes.push({ methods, path: `/auth${path}` });
+    }
+  });
+  res.json(routes);
+});
 
 module.exports = router;
 
