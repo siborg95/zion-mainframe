@@ -7,11 +7,9 @@
   "engines": {
     "node": ">=18",
     "npm": ">=9"
-  },
-  "scripts": {
-    "start":"node canary.js",
-    "dev": "nodemon server.js"
-  },
+"scripts": {
+  "start": "node server.js"
+}
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
