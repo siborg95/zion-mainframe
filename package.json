@@ -1,5 +1,5 @@
 {
-  "name": "zion-mainframe",
+  "name": "zion-mainframe-frontend",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -10,8 +10,6 @@
     "start": "serve -s dist -l $PORT"
   },
   "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.19.2",
     "serve": "^14.2.4",
     "vue": "^3.5.18",
     "vue-router": "^4.5.1"
@@ -21,6 +19,6 @@
     "vite": "^6.3.5"
   },
   "engines": {
-    "node": ">=20"
+    "node": "20.x"
   }
 }
