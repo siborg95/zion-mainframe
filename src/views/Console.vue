@@ -1,8 +1,4 @@
 ﻿<template>
-  <div class="console">
-    <h1>Console</h1>
-    <p>Console OK</p>
-  </div>
+  <div class="console"><h1>CONSOLE LIVE ✅</h1></div>
 </template>
-<script setup>
-</script>
+<script setup></script>
