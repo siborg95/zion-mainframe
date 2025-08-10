@@ -1,253 +1,144 @@
 <template>
   <div class="shell">
-    <header class="site-header">
-      <div class="title">Welcome to NeuroSharp Console</div>
-      <div class="actions">
-        <button class="btn ghost" @click="clear" :disabled="messages.length===0 || sending">Clear</button>
-        <button class="btn ghost" @click="logout">Logout</button>
+    <header class="bar">
+      <div class="title">Console</div>
+      <div class="right">
+        <button class="btn" @click="clear" :disabled="messages.length===0 || sending">Clear</button>
       </div>
     </header>
 
-    <main class="main">
-      <!-- LEFT: Console -->
-      <section class="console">
-        <div class="log" ref="logPane">
-          <div v-if="messages.length===0" class="empty">No messages yet.</div>
-
-          <template v-else>
-            <div v-for="(m, i) in messages" :key="i" class="row" :class="m.role">
-              <span class="time">[{{ m.time }}]</span>
-              <span class="who" v-if="m.role==='user'">You:</span>
-              <span class="who" v-else-if="m.role==='assistant'">Oracle:</span>
-              <span class="who" v-else>System:</span>
-              <span class="text">{{ m.text }}</span>
-            </div>
-          </template>
+    <main class="log" ref="logPane">
+      <div v-if="messages.length===0" class="empty">[Console ready] Type <code>/help</code> to see commands.</div>
+      <div v-else>
+        <div v-for="(m,i) in messages" :key="i" class="row" :class="m.role">
+          <span class="time">[{{ m.time }}]</span>
+          <span class="who">{{ m.role === 'user' ? 'You' : 'Oracle' }}:</span>
+          <span class="text">{{ m.text }}</span>
         </div>
-
-        <!-- Single-line composer: Enter sends -->
-        <form class="composer" @submit.prevent="send">
-          <input
-            v-model="text"
-            class="input"
-            type="text"
-            placeholder="Ask Oracle…"
-            aria-label="Ask Oracle"
-            :disabled="sending"
-            autocomplete="off"
-            spellcheck="false"
-            inputmode="text"
-            @keydown.enter.exact.prevent="send"
-          />
-          <button class="btn primary" type="submit" :disabled="sending || !text.trim()">
-            {{ sending ? 'Sending…' : 'Send' }}
-          </button>
-        </form>
-      </section>
-
-      <!-- RIGHT: Sidebar actions -->
-      <aside class="sidebar">
-        <button class="btn block" @click="addSystem('Starting drill…')">📘 Start Drill</button>
-        <button class="btn block" @click="refreshLog">🔁 Refresh Log</button>
-        <button class="btn block" @click="addSystem('Loading profile…')">🧠 Load Profile</button>
-        <button class="btn block" @click="addSystem('Displaying metrics…')">📊 Show Metrics</button>
-        <button class="btn block" @click="health">🩺 Backend Health</button>
-        <button class="btn block danger" @click="logout">🔒 Logout</button>
-      </aside>
+      </div>
     </main>
+
+    <footer class="inputbar">
+      <input
+        class="input"
+        v-model="draft"
+        placeholder="Type a command… (/help)"
+        :disabled="sending"
+        @keyup.enter="send"
+        autocomplete="off"
+      />
+      <button class="btn primary" :disabled="!draft || sending" @click="send">
+        {{ sending ? 'Sending…' : 'Send' }}
+      </button>
+    </footer>
   </div>
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
-import { askGPT } from '../lib/api'
+import { ref, onMounted, nextTick } from 'vue'
 
-const router = useRouter()
+const API = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '')
+const token = localStorage.getItem('token') || ''
+
 const messages = ref([])
-const text = ref('')
+const draft = ref('')
 const sending = ref(false)
 const logPane = ref(null)
 
-const API = import.meta.env.VITE_API_URL || ''
-
-const now = () => new Date().toLocaleTimeString()
-
-const scrollToEnd = () => {
-  nextTick(() => {
-    const el = logPane.value
-    if (el) el.scrollTop = el.scrollHeight
-  })
+function joinUrl(base, path) {
+  return `${base || ''}/${path}`.replace(/([^:]\/)\/+/g, '$1')
 }
 
-function addSystem(msg) {
-  messages.value.push({ role: 'system', text: msg, time: now() })
-  scrollToEnd()
+function now () {
+  const d = new Date()
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
 }
-function refreshLog() {
-  messages.value.push({ role: 'system', text: 'Log refreshed.', time: now() })
-  scrollToEnd()
+
+function scrollToBottom () {
+  nextTick(() => { if (logPane.value) logPane.value.scrollTop = logPane.value.scrollHeight })
 }
-async function health() {
+
+function clear () {
+  messages.value = []
+  scrollToBottom()
+}
+
+async function fetchHistory () {
   try {
-    const r = await fetch(`${API}/health`)
-    const ok = r.ok ? 'ok' : `HTTP ${r.status}`
-    messages.value.push({ role: 'system', text: `Health: ${ok}`, time: now() })
-  } catch (e) {
-    messages.value.push({ role: 'system', text: `Health error: ${e.message || e}`, time: now() })
-  } finally {
-    scrollToEnd()
-  }
+    const url = joinUrl(API, 'console/history')
+    const res = await fetch(url, {
+      headers: { Authorization: token ? `Bearer ${token}` : undefined }
+    })
+    const raw = await res.text()
+    let data = null
+    try { data = raw ? JSON.parse(raw) : null } catch {}
+    if (Array.isArray(data?.items)) messages.value = data.items
+  } catch { /* ignore */ }
+  scrollToBottom()
 }
 
 async function send () {
-  const t = text.value.trim()
-  if (!t || sending.value) return
-  messages.value.push({ role: 'user', text: t, time: now() })
-  text.value = ''
+  const text = draft.value.trim()
+  if (!text) return
+
+  messages.value.push({ role: 'user', text, time: now() })
+  draft.value = ''
   sending.value = true
-  scrollToEnd()
+  scrollToBottom()
+
   try {
-    const reply = await askGPT(t)
-    messages.value.push({ role: 'assistant', text: reply || '(empty response)', time: now() })
+    const url = joinUrl(API, 'console')
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: token ? `Bearer ${token}` : undefined
+      },
+      body: JSON.stringify({ message: text })
+    })
+
+    const raw = await res.text()
+    let data = null
+    try { data = raw ? JSON.parse(raw) : null } catch {}
+
+    let reply =
+      (data && typeof data.reply === 'string' && data.reply) ||
+      (raw && raw.trim()) ||
+      (data && data.error) ||
+      ''
+
+    if (!res.ok || !reply) {
+      reply = `No reply from server (HTTP ${res.status}${raw?.trim() ? `: ${raw.trim().slice(0, 200)}` : ''})`
+    }
+
+    messages.value.push({ role: 'assistant', text: reply, time: now() })
   } catch (e) {
-    messages.value.push({ role: 'assistant', text: `Error: ${e.message || e}`, time: now() })
+    messages.value.push({ role: 'assistant', text: String(e?.message || e), time: now() })
   } finally {
     sending.value = false
-    scrollToEnd()
+    scrollToBottom()
   }
 }
 
-function clear () { messages.value = [] }
-function logout () { localStorage.removeItem('token'); router.push('/login') }
+onMounted(fetchHistory)
 </script>
 
 <style scoped>
-/* Layout */
-.shell {
-  background: #f9f9f9;
-  min-height: 100vh;
-  color: #111;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Header */
-.site-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 16px 20px;
-  background: #fff;
-  border-bottom: 1px solid #e5e7eb;
-}
-.title { font-size: 20px; font-weight: 700; }
-.actions { display: flex; gap: 8px; }
-
-/* Main split */
-.main {
-  display: flex;
-  gap: 18px;
-  padding: 18px;
-  flex: 1;
-  min-height: 0; /* allow children to scroll */
-}
-
-/* Left: console */
-.console {
-  flex: 3;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-.log {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 14px;
-  overflow: auto;
-  flex: 1;
-}
-.empty {
-  text-align: center;
-  color: #6b7280;
-  padding: 24px 0;
-}
-.row {
-  font-size: 14px;
-  line-height: 1.45;
-  padding: 6px 4px;
-  border-bottom: 1px dashed #f1f5f9;
-}
-.row:last-child { border-bottom: 0; }
-.row.user .who { color: #2563eb; font-weight: 600; }
-.row.assistant .who { color: #0ea5e9; font-weight: 600; }
-.time { color: #9ca3af; margin-right: 6px; }
-.who { margin-right: 6px; }
-.text { white-space: pre-wrap; }
-
-/* Composer */
-.composer {
-  margin-top: 10px;
-  display: flex;
-  gap: 10px;
-}
-.input {
-  flex: 1;
-  padding: 12px 12px;
-  border-radius: 10px;
-  border: 1px solid #d1d5db;
-  background: #f9fafb;
-  color: #111827;
-  outline: none;
-  transition: border .15s, box-shadow .15s, background .15s;
-  min-width: 0;
-}
-.input::placeholder { color: #6b7280; }
-.input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37,99,235,.15);
-  background: #fff;
-}
-
-/* Sidebar */
-.sidebar {
-  flex: 1;
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  min-width: 220px;
-}
-
-/* Buttons */
-.btn {
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid #d1d5db;
-  background: #fff;
-  color: #111827;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform .05s ease, box-shadow .15s ease, filter .15s ease, opacity .15s ease;
-}
-.btn:hover { box-shadow: 0 6px 14px rgba(0,0,0,0.08); }
-.btn:active { transform: translateY(1px); }
-.btn:disabled { opacity: .6; cursor: default; }
-.btn.block { width: 100%; text-align: left; }
-
-.btn.primary {
-  border-color: #2563eb;
-  background: #2563eb;
-  color: #fff;
-}
-.btn.primary:hover { box-shadow: 0 8px 18px rgba(37,99,235,.25); }
-
-.btn.ghost { background: #fff; color: #111827; }
-.btn.danger { border-color: #ef4444; color: #ef4444; }
-.btn.danger:hover { box-shadow: 0 8px 18px rgba(239,68,68,.2); }
+.shell { display:flex; flex-direction:column; height: calc(100vh - 40px); max-width: 900px; margin: 20px auto; padding: 0 10px; box-sizing: border-box; }
+.bar { display:flex; align-items:center; justify-content:space-between; padding:8px 2px; }
+.title { font-weight: 700; }
+.right { display:flex; gap:8px; }
+.log { flex:1; overflow:auto; background:#0b0f1a; color:#e5e7eb; padding:10px 12px; border-radius: 10px; }
+.row { display:block; margin: 6px 0; line-height:1.35; }
+.row .time { color:#9ca3af; margin-right:8px; }
+.row .who { color:#93c5fd; margin-right:6px; font-weight:600; }
+.row.user .who { color:#34d399; }
+.row .text { white-space: pre-wrap; word-break: break-word; }
+.empty { color:#9ca3af; }
+.inputbar { display:flex; gap:8px; padding:10px 0; }
+.input { flex:1; padding:10px 12px; border-radius:10px; border:1px solid #d1d5db; outline:none; }
+.btn { padding:10px 12px; border:0; border-radius:10px; cursor:pointer; }
+.btn.primary { background:#2563eb; color:#fff; font-weight:700; }
+.btn:disabled { opacity:.6; cursor:default; }
+code { background: rgba(255,255,255,.08); padding: 1px 6px; border-radius: 6px; }
 </style>

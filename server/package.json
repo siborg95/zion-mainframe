@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "zion-backend",
   "private": true,
   "type": "commonjs",
@@ -8,7 +8,10 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "zion-mainframe": "file:.."
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  }
 }

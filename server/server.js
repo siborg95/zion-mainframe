@@ -1,6 +1,6 @@
 ﻿const express = require("express");
 const cors = require("cors");
-const consoleRouter = require("../routes/console"); // routes/console.js at repo root
+const consoleRouter = require("./routes/console"); // now inside server/routes
 
 const app = express();
 
