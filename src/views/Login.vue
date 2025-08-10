@@ -1,10 +1,10 @@
 ﻿<template>
   <div class="page">
     <div class="wrap">
-      <!-- Logo spans the card width, keeps aspect ratio -->
+      <!-- Logo matches card width, keeps aspect ratio -->
       <img class="logo" src="/neurosharp-logo.png" alt="NeuroSharp" draggable="false" />
 
-      <!-- White card like your sample -->
+      <!-- Blue login box on white background -->
       <div class="card">
         <h1 class="title">Welcome to NeuroSharp Cloud</h1>
 
@@ -69,40 +69,37 @@ async function doLogin () {
 </script>
 
 <style scoped>
-/* page background stays dark */
+/* White (light) page background */
 .page {
   min-height: 100vh;
   margin: 0;
-  background: radial-gradient(1200px 800px at 20% 10%, #1f2937 0%, rgba(17,24,39,0.9) 40%, #0b0f1a 100%),
-              linear-gradient(135deg, #0b0f1a 0%, #1a1f2b 100%);
+  background: #f7f8fb; /* soft white */
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px;
   box-sizing: border-box;
-  color: #fff; /* for tagline */
+  color: #111827;
 }
 
-/* card width; logo matches this */
 .wrap { width: 100%; max-width: 440px; text-align: center; }
 
-/* logo as wide as the card; keep aspect ratio */
+/* Logo fills the card width, keeps aspect ratio */
 .logo {
   width: 100%;
   height: auto;
   display: block;
-  margin: 0 auto 20px;
+  margin: 0 auto 18px;
   user-select: none;
 }
 
-/* white box like your sample */
+/* Blue login box */
 .card {
-  background: #ffffff;
-  color: #111827; /* dark text inside card */
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 28px;
-  box-shadow: 0 10px 24px rgba(0,0,0,0.15);
+  background: linear-gradient(135deg, #1e3a8a, #2563eb);
+  color: #ffffff;
+  border-radius: 14px;
+  padding: 26px;
+  box-shadow: 0 14px 28px rgba(0,0,0,0.18);
   text-align: left;
 }
 
@@ -111,39 +108,40 @@ async function doLogin () {
   font-size: 22px;
   font-weight: 700;
   text-align: center;
-  color: #111827;
+  color: #ffffff;
 }
 
+/* Fields */
 .field { margin-bottom: 14px; }
-.label { display: block; font-size: 13px; margin-bottom: 6px; color: #374151; }
-
+.label { display: block; font-size: 13px; margin-bottom: 6px; color: rgba(255,255,255,0.9); }
 .passrow { position: relative; }
 
+/* White inputs on blue card */
 .input {
   width: 100%;
   padding: 12px 12px;
   border-radius: 10px;
   border: 1px solid #d1d5db;
-  background: #f9fafb;
+  background: #ffffff;
   color: #111827;
   outline: none;
-  transition: border .15s, box-shadow .15s, background .15s;
   box-sizing: border-box;
+  transition: border .15s, box-shadow .15s, background .15s;
 }
 .input::placeholder { color: #6b7280; }
 .input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+  border-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.35);
   background: #ffffff;
 }
 
 .eye {
   position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
   height: 32px; padding: 0 10px; border: 0; border-radius: 8px;
-  background: transparent; color: #4b5563; cursor: pointer;
+  background: transparent; color: #374151; cursor: pointer;
 }
 
-/* blue primary button */
+/* Button: white on blue card */
 .btn {
   width: 100%;
   margin-top: 8px;
@@ -151,18 +149,18 @@ async function doLogin () {
   border: 0;
   border-radius: 10px;
   font-weight: 700;
-  background: #2563eb;     /* blue */
-  color: #ffffff;
+  background: #ffffff;
+  color: #0b0f1a;
   cursor: pointer;
-  transition: filter .15s ease, transform .05s ease, box-shadow .15s ease;
+  transition: transform .05s ease, box-shadow .15s ease, filter .15s ease;
 }
-.btn:hover { filter: brightness(1.05); box-shadow: 0 8px 18px rgba(37,99,235,.25); }
+.btn:hover { filter: brightness(0.98); box-shadow: 0 8px 18px rgba(255,255,255,.25); }
 .btn:active { transform: translateY(1px); }
-.btn:disabled { opacity: .6; cursor: default; }
+.btn:disabled { opacity: .65; cursor: default; }
 
 .spinner {
   width: 16px; height: 16px; border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.35); border-top-color: #fff;
+  border: 2px solid rgba(0,0,0,0.25); border-top-color: rgba(0,0,0,0.75);
   display: inline-block; margin-right: 8px; vertical-align: -2px;
   animation: spin 0.9s linear infinite;
 }
@@ -170,7 +168,7 @@ async function doLogin () {
 
 .error { margin-top: 10px; color: #b91c1c; text-align: center; font-size: 13px; }
 
-/* tagline under card (white on dark bg) */
-.tagline { margin-top: 14px; color: rgba(255,255,255,0.8); font-size: 13px; }
-.tagline strong { color: #fff; }
+/* Tagline on white page */
+.tagline { margin-top: 14px; color: #374151; font-size: 13px; }
+.tagline strong { color: #111827; }
 </style>
