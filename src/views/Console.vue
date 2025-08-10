@@ -1,88 +1,54 @@
 <template>
   <div class="console">
-    <h2>Console View</h2>
+    <h1>Console</h1>
 
-    <div class="actions">
-      <button @click="checkAuth" :disabled="loading">
-        {{ loading ? 'Checking…' : 'Verify session' }}
+    <div class="gpt-box">
+      <textarea v-model="prompt" placeholder="Ask GPT…" rows="4"></textarea>
+      <button @click="send" :disabled="loading || !prompt.trim()">
+        {{ loading ? 'Sending…' : 'Send' }}
       </button>
-      <button @click="clearLogs" :disabled="loading">Clear</button>
     </div>
 
-    <pre class="log">{{ logs.join('\n') }}</pre>
+    <pre v-if="reply" class="reply">{{ reply }}</pre>
+
+    <button class="logout" @click="logout">Logout</button>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import { askGPT } from '../lib/api'
+import { useRouter } from 'vue-router'
 
-// Your live backend
-const API = 'https://zion-mainframe-backend-production.up.railway.app'
-
-const logs = ref(['[Console ready]'])
+const router = useRouter()
+const prompt = ref('')
+const reply = ref('')
 const loading = ref(false)
 
-function log(...args) {
-  logs.value.push(args.map(a => (typeof a === 'string' ? a : JSON.stringify(a))).join(' '))
-}
-
-function clearLogs() {
-  logs.value = ['[Console ready]']
-}
-
-async function authFetch(path, opts = {}) {
-  const token = localStorage.getItem('token')
-  const headers = {
-    ...(opts.headers || {}),
-    // attach token if present
-    ...(token ? { Authorization: `Bearer ${token}` } : {})
-  }
-  const res = await fetch(`${API}${path}`, { ...opts, headers })
-  const text = await res.text()
-  let data
-  try { data = JSON.parse(text) } catch { data = text }
-  return { ok: res.ok, status: res.status, data }
-}
-
-async function checkAuth() {
+async function send () {
   loading.value = true
-  logs.value = ['[Console ready]']
+  reply.value = ''
   try {
-    log('Reading token from localStorage…')
-    const token = localStorage.getItem('token')
-    if (!token) {
-      log('❌ No token found. Go back and log in.')
-      loading.value = false
-      return
-    }
-    log('✅ Token found (first 32):', token.slice(0, 32) + '…')
-
-    // Try common “who am I” endpoints. Keep whichever exists in your API.
-    log('→ GET /auth/me')
-    let r = await authFetch('/auth/me', { method: 'GET' })
-    log(`Status ${r.status}`, r.data)
-    if (!r.ok) {
-      log('→ GET /auth/profile')
-      r = await authFetch('/auth/profile', { method: 'GET' })
-      log(`Status ${r.status}`, r.data)
-    }
-
-    // Example protected API call (change to a real one you have)
-    log('→ GET /api/secure (example)')
-    const r2 = await authFetch('/api/secure', { method: 'GET' })
-    log(`Status ${r2.status}`, r2.data)
-
+    reply.value = await askGPT(prompt.value)
   } catch (e) {
-    log('❌ Error:', e?.message || e)
+    reply.value = `Error: ${e.message || e}`
   } finally {
     loading.value = false
   }
 }
+
+function logout () {
+  localStorage.removeItem('token')
+  router.push('/login')
+}
 </script>
 
 <style scoped>
-.console { max-width: 800px; margin: 2rem auto; display: grid; gap: 1rem; }
-.actions { display: flex; gap: .5rem; }
-button { padding: .6rem .9rem; border: none; border-radius: 8px; cursor: pointer; }
-.log { background: #0b1020; color: #cde3ff; padding: 1rem; border-radius: 8px; min-height: 240px; white-space: pre-wrap; }
+.console { max-width: 720px; margin: 2.5rem auto; padding: 1.25rem; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+.gpt-box { display: grid; gap: .75rem; }
+textarea { width: 100%; padding: .6rem .75rem; border: 1px solid #d0d7de; border-radius: 8px; outline: none; }
+textarea:focus { border-color: #0969da; box-shadow: 0 0 0 3px rgba(9,105,218,.15); }
+button { padding: .6rem 1rem; border: 0; border-radius: 8px; cursor: pointer; font-weight: 600; }
+.reply { margin-top: 1rem; background: #f6f8fa; padding: .75rem; border-radius: 8px; white-space: pre-wrap; }
+.logout { margin-top: 1rem; background: #eee; }
 </style>
