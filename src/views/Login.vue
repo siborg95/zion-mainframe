@@ -1,31 +1,98 @@
-﻿<style scoped>
-/* White (light) page background */
+﻿<template>
+  <div class="page">
+    <div class="wrap">
+      <img class="logo" src="/neurosharp-logo.png" alt="NeuroSharp" draggable="false" />
+      <div class="card">
+        <h1 class="title">Welcome to NeuroSharp Cloud</h1>
+
+        <div class="field">
+          <label class="label">Username</label>
+          <input class="input" v-model="username" type="text" placeholder="administrator" autocomplete="username" />
+        </div>
+
+        <div class="field">
+          <label class="label">Password</label>
+          <div class="passrow">
+            <input class="input" :type="showPwd ? 'text' : 'password'" v-model="password" placeholder="••••••••••••" autocomplete="current-password" />
+            <button type="button" class="eye" @click="showPwd = !showPwd">{{ showPwd ? 'Hide' : 'Show' }}</button>
+          </div>
+        </div>
+
+        <button class="btn" :disabled="loading" @click="doLogin">
+          <span v-if="loading" class="spinner"></span>
+          <span>{{ loading ? 'Signing in…' : 'Sign in' }}</span>
+        </button>
+
+        <p v-if="error" class="error">{{ error }}</p>
+      </div>
+
+      <p class="tagline">Powered by <strong>NeuroSharp Quantum Core</strong></p>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const username = ref('')
+const password = ref('')
+const loading = ref(false)
+const error = ref('')
+const showPwd = ref(false)
+
+const API = import.meta.env.VITE_API_URL || ''
+
+async function doLogin () {
+  loading.value = true
+  error.value = ''
+  try {
+    const res = await fetch(`${API}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: username.value, password: password.value })
+    })
+    const data = await res.json()
+    if (!res.ok || !data?.ok) throw new Error(data?.error || `HTTP ${res.status}`)
+    localStorage.setItem('token', data.token)
+    router.push('/console')
+  } catch (e) {
+    error.value = String(e.message || e)
+  } finally {
+    loading.value = false
+  }
+}
+</script>
+
+<style scoped>
+/* white page, content higher up */
 .page {
   min-height: 100vh;
   margin: 0;
   background: #f7f8fb;
   display: flex;
-  align-items: center;
-  justify-content: flex-start;   /* move content higher */
-  padding: 32px 24px 24px;       /* top padding instead of perfect center */
+  align-items: flex-start;
+  justify-content: center;
+  padding: 32px 24px 24px;
   box-sizing: border-box;
   color: #111827;
 }
 
-/* Card width; logo will be slightly smaller than this */
+/* card width; logo is slightly smaller than this */
 .wrap { width: 100%; max-width: 440px; text-align: center; }
 
-/* Logo: a bit smaller than the box, keep aspect ratio, tighter spacing */
+/* logo slightly narrower than the card */
 .logo {
-  width: 90%;           /* slightly narrower than the card */
-  max-width: 420px;     /* guardrail on very wide screens */
+  width: 90%;
+  max-width: 420px;
   height: auto;
   display: block;
-  margin: 4px auto 14px;/* less top/bottom gap so more room for the card */
+  margin: 4px auto 14px;
   user-select: none;
 }
 
-/* Blue login box */
+/* blue login box */
 .card {
   background: linear-gradient(135deg, #1e3a8a, #2563eb);
   color: #ffffff;
@@ -47,7 +114,7 @@
 .label { display: block; font-size: 13px; margin-bottom: 6px; color: rgba(255,255,255,0.9); }
 .passrow { position: relative; }
 
-/* White inputs on blue card */
+/* white inputs on blue card */
 .input {
   width: 100%;
   padding: 12px 12px;
@@ -72,7 +139,6 @@
   background: transparent; color: #374151; cursor: pointer;
 }
 
-/* Button: white on blue card */
 .btn {
   width: 100%;
   margin-top: 8px;
@@ -99,7 +165,6 @@
 
 .error { margin-top: 10px; color: #b91c1c; text-align: center; font-size: 13px; }
 
-/* Tagline on white page */
 .tagline { margin-top: 14px; color: #374151; font-size: 13px; }
 .tagline strong { color: #111827; }
 </style>
