@@ -1,46 +1,88 @@
-
 <template>
-  <div style="padding: 20px;">
+  <div class="console">
     <h2>Console View</h2>
-    <div class="log" v-html="logs.join('<br>')" style="border:1px solid #ccc; padding:10px; margin-bottom:10px;"></div>
-    <input v-model="entry" placeholder="Type something..." />
-    <button @click="submitLog">Submit</button>
-    <div class="buttons" style="margin-top: 10px;">
-      <button @click="addLog('Starting drill...')">📘 Start Drill</button>
-      <button @click="clearLog">🔁 Refresh Log</button>
-      <button @click="addLog('Loading profile...')">🧠 Load Profile</button>
-      <button @click="addLog('Displaying metrics...')">📊 Show Metrics</button>
-      <button @click="logout">🔒 Logout</button>
+
+    <div class="actions">
+      <button @click="checkAuth" :disabled="loading">
+        {{ loading ? 'Checking…' : 'Verify session' }}
+      </button>
+      <button @click="clearLogs" :disabled="loading">Clear</button>
     </div>
+
+    <pre class="log">{{ logs.join('\n') }}</pre>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 
-const router = useRouter()
+// Your live backend
+const API = 'https://zion-mainframe-backend-production.up.railway.app'
+
 const logs = ref(['[Console ready]'])
-const entry = ref('')
+const loading = ref(false)
 
-function addLog(text) {
-  const timestamp = new Date().toLocaleTimeString()
-  logs.value.push(`[${timestamp}] ${text}`)
+function log(...args) {
+  logs.value.push(args.map(a => (typeof a === 'string' ? a : JSON.stringify(a))).join(' '))
 }
 
-function submitLog() {
-  if (entry.value.trim()) {
-    addLog(entry.value)
-    entry.value = ''
-  }
-}
-
-function clearLog() {
+function clearLogs() {
   logs.value = ['[Console ready]']
 }
 
-function logout() {
-  localStorage.removeItem('userEmail')
-  router.push('/login')
+async function authFetch(path, opts = {}) {
+  const token = localStorage.getItem('token')
+  const headers = {
+    ...(opts.headers || {}),
+    // attach token if present
+    ...(token ? { Authorization: `Bearer ${token}` } : {})
+  }
+  const res = await fetch(`${API}${path}`, { ...opts, headers })
+  const text = await res.text()
+  let data
+  try { data = JSON.parse(text) } catch { data = text }
+  return { ok: res.ok, status: res.status, data }
+}
+
+async function checkAuth() {
+  loading.value = true
+  logs.value = ['[Console ready]']
+  try {
+    log('Reading token from localStorage…')
+    const token = localStorage.getItem('token')
+    if (!token) {
+      log('❌ No token found. Go back and log in.')
+      loading.value = false
+      return
+    }
+    log('✅ Token found (first 32):', token.slice(0, 32) + '…')
+
+    // Try common “who am I” endpoints. Keep whichever exists in your API.
+    log('→ GET /auth/me')
+    let r = await authFetch('/auth/me', { method: 'GET' })
+    log(`Status ${r.status}`, r.data)
+    if (!r.ok) {
+      log('→ GET /auth/profile')
+      r = await authFetch('/auth/profile', { method: 'GET' })
+      log(`Status ${r.status}`, r.data)
+    }
+
+    // Example protected API call (change to a real one you have)
+    log('→ GET /api/secure (example)')
+    const r2 = await authFetch('/api/secure', { method: 'GET' })
+    log(`Status ${r2.status}`, r2.data)
+
+  } catch (e) {
+    log('❌ Error:', e?.message || e)
+  } finally {
+    loading.value = false
+  }
 }
 </script>
+
+<style scoped>
+.console { max-width: 800px; margin: 2rem auto; display: grid; gap: 1rem; }
+.actions { display: flex; gap: .5rem; }
+button { padding: .6rem .9rem; border: none; border-radius: 8px; cursor: pointer; }
+.log { background: #0b1020; color: #cde3ff; padding: 1rem; border-radius: 8px; min-height: 240px; white-space: pre-wrap; }
+</style>
