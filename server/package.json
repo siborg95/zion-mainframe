@@ -9,7 +9,7 @@
     "npm": ">=9"
   },
   "scripts": {
-    "start": "node server.js",
+    "start":"node canary.js",
     "dev": "nodemon server.js"
   },
   "dependencies": {
