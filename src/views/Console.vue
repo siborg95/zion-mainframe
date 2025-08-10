@@ -123,51 +123,59 @@ function logout () { localStorage.removeItem('token'); router.push('/login') }
 </script>
 
 <style scoped>
-/* Layout */
+/* Fill the viewport; prevent page-level scrolling */
 .shell {
-  background: #f9f9f9;
-  min-height: 100vh;
-  color: #111;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  background: #f9f9f9;
+  color: #111;
+  overflow: hidden;
 }
 
-/* Header */
+/* Fixed-height header */
 .site-header {
+  flex: 0 0 56px;
+  height: 56px;
+  padding: 0 16px;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 16px 20px;
-  background: #fff;
-  border-bottom: 1px solid #e5e7eb;
 }
 .title { font-size: 20px; font-weight: 700; }
 .actions { display: flex; gap: 8px; }
 
-/* Main split */
+/* Main area fills the rest of the viewport */
 .main {
+  flex: 1 1 auto;
+  min-height: 0;            /* allow children to size/scroll */
   display: flex;
   gap: 18px;
-  padding: 18px;
-  flex: 1;
-  min-height: 0; /* allow children to scroll */
+  padding: 16px;
+  overflow: hidden;         /* no page scroll */
 }
 
-/* Left: console */
+/* Left: console column with its own layout */
 .console {
-  flex: 3;
+  flex: 3 1 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  min-width: 0;
+  min-height: 0;            /* important for flex children */
 }
+
+/* Log takes all leftover height and scrolls */
 .log {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   padding: 14px;
-  overflow: auto;
-  flex: 1;
 }
 .empty {
   text-align: center;
@@ -187,11 +195,12 @@ function logout () { localStorage.removeItem('token'); router.push('/login') }
 .who { margin-right: 6px; }
 .text { white-space: pre-wrap; }
 
-/* Composer */
+/* Composer stays visible at bottom */
 .composer {
-  margin-top: 10px;
+  flex: 0 0 auto;
   display: flex;
   gap: 10px;
+  margin-top: 10px;
 }
 .input {
   flex: 1;
@@ -211,9 +220,10 @@ function logout () { localStorage.removeItem('token'); router.push('/login') }
   background: #fff;
 }
 
-/* Sidebar */
+/* Right: sidebar */
 .sidebar {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 220px;
   background: #f3f4f6;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
@@ -221,7 +231,7 @@ function logout () { localStorage.removeItem('token'); router.push('/login') }
   display: flex;
   flex-direction: column;
   gap: 10px;
-  min-width: 220px;
+  min-height: 0;
 }
 
 /* Buttons */
@@ -239,15 +249,15 @@ function logout () { localStorage.removeItem('token'); router.push('/login') }
 .btn:active { transform: translateY(1px); }
 .btn:disabled { opacity: .6; cursor: default; }
 .btn.block { width: 100%; text-align: left; }
-
-.btn.primary {
-  border-color: #2563eb;
-  background: #2563eb;
-  color: #fff;
-}
+.btn.primary { border-color: #2563eb; background: #2563eb; color: #fff; }
 .btn.primary:hover { box-shadow: 0 8px 18px rgba(37,99,235,.25); }
-
 .btn.ghost { background: #fff; color: #111827; }
 .btn.danger { border-color: #ef4444; color: #ef4444; }
 .btn.danger:hover { box-shadow: 0 8px 18px rgba(239,68,68,.2); }
+
+/* Mobile: stack sidebar under console */
+@media (max-width: 900px) {
+  .main { flex-direction: column; }
+  .sidebar { min-width: 0; }
+}
 </style>
