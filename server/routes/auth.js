@@ -1,63 +1,19 @@
-const express = require('express');
+// server/routes/auth.js  (CommonJS, no DB)
+const express = require("express");
 const router = express.Router();
-const bcrypt = require('bcryptjs');
-const User = require('../models/User');
 
-// POST /auth/reset-admin — create or update the administrator user
-router.post('/reset-admin', async (req, res) => {
-  try {
-    const { password } = req.body;
-    if (!password) {
-      return res.status(400).json({ success: false, message: 'Password required' });
-    }
+router.get("/health", (_req, res) => {
+  res.json({ ok: true, status: "Backend is running" });
+});
 
-    let user = await User.findOne({ username: 'administrator' });
-    if (!user) {
-      user = new User({ username: 'administrator', password });
-    } else {
-      user.password = password;
-    }
-
-    await user.save();
-    res.json({ success: true, message: 'Admin password reset successfully' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+router.post("/login", express.json(), (req, res) => {
+  const { username, password } = req.body || {};
+  if (!username || !password) {
+    return res.status(400).json({ ok: false, error: "Missing credentials" });
   }
-});
-
-// GET /auth/health — simple health check
-router.get('/health', (_req, res) => {
-  res.json({ success: true, status: 'Backend is running' });
-});
-
-// POST /auth/login — verify credentials
-router.post('/login', async (req, res) => {
-  try {
-    const { username, password } = req.body;
-
-    const user = await User.findOne({ username });
-    if (!user) return res.status(401).json({ success: false, message: 'Invalid credentials' });
-
-    const ok = await bcrypt.compare(password, user.password);
-    if (!ok) return res.status(401).json({ success: false, message: 'Invalid credentials' });
-
-    res.json({ success: true, username: user.username });
-  } catch (e) {
-    res.status(500).json({ success: false, error: e.message });
-  }
-});
-// DEBUG: list available auth routes
-router.get('/routes', (req, res) => {
-  const routes = [];
-  router.stack.forEach((layer) => {
-    if (layer.route) {
-      const path = layer.route.path;
-      const methods = Object.keys(layer.route.methods).join(',').toUpperCase();
-      routes.push({ methods, path: `/auth${path}` });
-    }
-  });
-  res.json(routes);
+  // TODO: replace with real auth later
+  const token = Buffer.from(`${username}:${Date.now()}`).toString("base64");
+  res.json({ ok: true, token });
 });
 
 module.exports = router;
-
