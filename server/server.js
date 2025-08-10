@@ -1,6 +1,9 @@
-﻿const express = require("express");
+﻿// server/server.js  (CommonJS)
+const express = require("express");
 const cors = require("cors");
-const consoleRouter = require("./routes/console"); // inside server/routes
+
+const authRouter = require("./routes/auth");       // /auth/login, /auth/health
+const consoleRouter = require("./routes/console"); // /console, /console/ping, /console/history
 
 const app = express();
 
@@ -8,8 +11,9 @@ const app = express();
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 
-// mount console endpoints
-app.use("/", consoleRouter);
+// mount routes
+app.use("/auth", authRouter);   // -> /auth/login
+app.use("/", consoleRouter);    // -> /console, /console/ping
 
 // health
 app.get("/", (_req, res) => res.json({ ok: true, service: "backend" }));
