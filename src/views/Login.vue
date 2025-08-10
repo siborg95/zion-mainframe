@@ -1,95 +1,27 @@
-﻿<template>
-  <div class="page">
-    <div class="wrap">
-      <!-- Logo matches card width, keeps aspect ratio -->
-      <img class="logo" src="/neurosharp-logo.png" alt="NeuroSharp" draggable="false" />
-
-      <!-- Blue login box on white background -->
-      <div class="card">
-        <h1 class="title">Welcome to NeuroSharp Cloud</h1>
-
-        <div class="field">
-          <label class="label">Username</label>
-          <input class="input" v-model="username" type="text" placeholder="administrator" autocomplete="username" />
-        </div>
-
-        <div class="field">
-          <label class="label">Password</label>
-          <div class="passrow">
-            <input class="input" :type="showPwd ? 'text' : 'password'" v-model="password" placeholder="••••••••••••" autocomplete="current-password" />
-            <button type="button" class="eye" @click="showPwd = !showPwd">{{ showPwd ? 'Hide' : 'Show' }}</button>
-          </div>
-        </div>
-
-        <button class="btn" :disabled="loading" @click="doLogin">
-          <span v-if="loading" class="spinner"></span>
-          <span>{{ loading ? 'Signing in…' : 'Sign in' }}</span>
-        </button>
-
-        <p v-if="error" class="error">{{ error }}</p>
-      </div>
-
-      <p class="tagline">Powered by <strong>NeuroSharp Quantum Core</strong></p>
-    </div>
-  </div>
-</template>
-
-<script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-
-const router = useRouter()
-const username = ref('')
-const password = ref('')
-const loading = ref(false)
-const error = ref('')
-const showPwd = ref(false)
-
-const API = import.meta.env.VITE_API_URL || ''
-
-async function doLogin () {
-  loading.value = true
-  error.value = ''
-  try {
-    const res = await fetch(`${API}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: username.value, password: password.value })
-    })
-    const data = await res.json()
-    if (!res.ok || !data?.ok) throw new Error(data?.error || `HTTP ${res.status}`)
-    localStorage.setItem('token', data.token)
-    router.push('/console')
-  } catch (e) {
-    error.value = String(e.message || e)
-  } finally {
-    loading.value = false
-  }
-}
-</script>
-
-<style scoped>
+﻿<style scoped>
 /* White (light) page background */
 .page {
   min-height: 100vh;
   margin: 0;
-  background: #f7f8fb; /* soft white */
+  background: #f7f8fb;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 24px;
+  justify-content: flex-start;   /* move content higher */
+  padding: 32px 24px 24px;       /* top padding instead of perfect center */
   box-sizing: border-box;
   color: #111827;
 }
 
+/* Card width; logo will be slightly smaller than this */
 .wrap { width: 100%; max-width: 440px; text-align: center; }
 
-/* Logo fills the card width, keeps aspect ratio */
+/* Logo: a bit smaller than the box, keep aspect ratio, tighter spacing */
 .logo {
-  width: 100%;
+  width: 90%;           /* slightly narrower than the card */
+  max-width: 420px;     /* guardrail on very wide screens */
   height: auto;
   display: block;
-  margin: 0 auto 18px;
+  margin: 4px auto 14px;/* less top/bottom gap so more room for the card */
   user-select: none;
 }
 
@@ -98,20 +30,19 @@ async function doLogin () {
   background: linear-gradient(135deg, #1e3a8a, #2563eb);
   color: #ffffff;
   border-radius: 14px;
-  padding: 26px;
+  padding: 24px;
   box-shadow: 0 14px 28px rgba(0,0,0,0.18);
   text-align: left;
 }
 
 .title {
-  margin: 0 0 16px;
+  margin: 0 0 14px;
   font-size: 22px;
   font-weight: 700;
   text-align: center;
   color: #ffffff;
 }
 
-/* Fields */
 .field { margin-bottom: 14px; }
 .label { display: block; font-size: 13px; margin-bottom: 6px; color: rgba(255,255,255,0.9); }
 .passrow { position: relative; }
