@@ -14,7 +14,7 @@ const app = express();
 
 // ----- CONFIG -----
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'https://oracle-front-end-production.up.railway.app';
-const MONGODB_URI     = process.env.MONGODB_URI;
+const MONGODB_URI     = process.env.MONGODB_URI; // may be undefined in prod until you set it
 const PORT            = process.env.PORT || 5000;
 
 // Trust Railway proxy so Secure cookies work
@@ -24,7 +24,7 @@ app.set('trust proxy', 1);
 app.use(express.json());
 app.use(cookieParser());
 
-// CORS (must be exact origin; allow credentials)
+// CORS
 app.use(cors({
   origin: FRONTEND_ORIGIN,
   credentials: true,
@@ -32,26 +32,33 @@ app.use(cors({
   allowedHeaders: ['Content-Type','Authorization']
 }));
 
-// Helmet (relax CORP so cross-origin assets aren’t blocked)
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: 'cross-origin' }
-}));
+// Helmet
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 
-// Routes
+// Basic root + health
+app.get('/', (_req, res) => res.status(200).send('API online'));
+app.get('/health', (_req, res) => {
+  const ready = mongoose.connection.readyState === 1; // 1 = connected
+  res.status(200).json({ ok: true, db: ready });
+});
+
+// Routes (these can 500 if DB truly required; that’s fine)
 app.use('/auth', authRoutes);
 app.use('/api',  apiRoutes);
 
-// Health
-app.get('/health', (_req, res) => res.json({ ok: true }));
+// ---- Start server first ----
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
+});
 
-// DB
+// ---- Connect DB without crashing the process ----
 if (!MONGODB_URI) {
-  console.error('Missing MONGODB_URI env var');
-  process.exit(1);
+  console.warn('⚠️  MONGODB_URI not set. API will run without DB.');
+} else {
+  mongoose.connect(MONGODB_URI)
+    .then(() => console.log('✅ MongoDB connected'))
+    .catch(err => {
+      console.error('❌ MongoDB connection error:', err.message);
+      // don't exit; keep serving / and /health so Railway stops 502s
+    });
 }
-mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('✅ MongoDB connected'))
-  .catch(err => { console.error('❌ MongoDB connection error:', err); process.exit(1); });
-
-// Start
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
