@@ -1,60 +1,86 @@
 ﻿<template>
-  <div class="login">
-    <h1>Login (SPA)</h1>
-    <form @submit.prevent="handleLogin">
-      <div class="field">
-        <label>Username</label>
-        <input v-model="username" autocomplete="username" />
+  <div class="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
+    <!-- Logo -->
+    <img
+      class="h-14 w-auto mb-6 opacity-90"
+      :src="logoUrl"
+      alt="NeuroSharp"
+      draggable="false"
+    />
+
+    <!-- Card -->
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
+      <h1 class="text-2xl font-bold text-gray-900 mb-6 text-center">Login (SPA)</h1>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+          <input
+            v-model="username"
+            type="text"
+            class="w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-800"
+            placeholder="administrator"
+            autocomplete="username"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <input
+            v-model="password"
+            type="password"
+            class="w-full rounded-xl border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-800"
+            placeholder="••••••••••••"
+            autocomplete="current-password"
+          />
+        </div>
+
+        <button
+          :disabled="loading"
+          @click="doLogin"
+          class="w-full rounded-xl px-4 py-2 font-semibold bg-gray-900 text-white hover:bg-black disabled:opacity-60">
+          {{ loading ? 'Logging in…' : 'Login' }}
+        </button>
+
+        <p v-if="error" class="text-sm text-red-600 text-center">{{ error }}</p>
       </div>
-      <div class="field">
-        <label>Password</label>
-        <input v-model="password" type="password" autocomplete="current-password" />
-      </div>
-      <button type="submit" :disabled="loading">{{ loading ? "Logging in…" : "Login" }}</button>
-      <button type="button" class="secondary" @click="forceContinue">Force Continue</button>
-      <p v-if="msg" class="msg">{{ msg }}</p>
-    </form>
+    </div>
+
+    <!-- Footer tagline -->
+    <p class="mt-4 text-sm text-gray-500 select-none">Powered by <span class="font-semibold">Quantum Core</span></p>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
-const router = useRouter();
-const API = "https://zion-mainframe-backend-production.up.railway.app";
-const username = ref(""); const password = ref(""); const loading = ref(false);
-const msg = ref("");
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import logoUrl from '@/assets/neurosharp-logo.png'
 
-async function handleLogin () {
-  msg.value = ""; loading.value = true;
+const router = useRouter()
+const username = ref('')
+const password = ref('')
+const loading = ref(false)
+const error = ref('')
+
+const API = import.meta.env.VITE_API_URL || ''
+
+async function doLogin () {
+  loading.value = true
+  error.value = ''
   try {
     const res = await fetch(`${API}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: username.value, password: password.value })
-    });
-    const data = await res.json().catch(() => ({}));
-    if (res.ok && data && data.ok) {
-      localStorage.setItem("token", data.token || "fake-jwt-token");
-      msg.value = "Login OK. Redirecting…";
-      router.push("/console");
-    } else {
-      msg.value = `Error [${res.status}]: ${data?.error || "Login failed"}`;
-    }
+    })
+    const data = await res.json()
+    if (!res.ok || !data?.ok) throw new Error(data?.error || `HTTP ${res.status}`)
+    localStorage.setItem('token', data.token)
+    router.push('/console')
   } catch (e) {
-    msg.value = `Network error: ${e?.message || e}`;
-  } finally { loading.value = false; }
+    error.value = String(e.message || e)
+  } finally {
+    loading.value = false
+  }
 }
-function forceContinue () { localStorage.setItem("token","dev"); router.push("/console"); }
 </script>
-
-<style scoped>
-.login { max-width: 420px; margin: 4rem auto; padding: 1.5rem; border-radius: 12px;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.08); background: #fff; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-.field { margin-bottom: 1rem; }
-label { display:block; margin-bottom:.25rem; font-weight:600; }
-input { width:100%; padding:.6rem .75rem; border:1px solid #d0d7de; border-radius:8px; outline:none; }
-button { width:100%; padding:.7rem 1rem; border:0; border-radius:8px; cursor:pointer; font-weight:600; margin-top:.5rem; }
-.secondary { background:#eee; }
-.msg { margin-top:.75rem; color:#333; }
-</style>
