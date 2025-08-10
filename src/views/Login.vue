@@ -1,12 +1,10 @@
 ﻿<template>
   <div class="page">
-    <div class="badge" v-if="buildLabel">BUILD {{ buildLabel }}</div>
-
     <div class="wrap">
       <img class="logo" src="/neurosharp-logo.png" alt="NeuroSharp" draggable="false" />
 
       <div class="card">
-        <h1 class="title">NeuroSharp Console</h1>
+        <h1 class="title">Welcome to NeuroSharp Cloud</h1>
         <p class="subtitle">Sign in to continue</p>
 
         <div class="field">
@@ -30,7 +28,7 @@
         <p v-if="error" class="error">{{ error }}</p>
       </div>
 
-      <p class="tagline">Powered by <strong>Quantum Core</strong></p>
+      <p class="tagline">Powered by <strong>NeuroSharp Quantum Core</strong></p>
     </div>
   </div>
 </template>
@@ -45,9 +43,6 @@ const password = ref('')
 const loading = ref(false)
 const error = ref('')
 const showPwd = ref(false)
-
-// optional build label (set VITE_BUILD in Railway if you want)
-const buildLabel = import.meta.env.VITE_BUILD || ''
 
 // MUST be set in Railway (frontend service)
 const API = import.meta.env.VITE_API_URL || ''
@@ -87,31 +82,10 @@ async function doLogin () {
   box-sizing: border-box;
 }
 
-.badge {
-  position: fixed;
-  top: 12px;
-  right: 12px;
-  font-size: 11px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
-  color: rgba(255,255,255,0.85);
-  backdrop-filter: blur(8px);
-}
-
-.wrap {
-  width: 100%;
-  max-width: 440px;
-  text-align: center;
-}
+.wrap { width: 100%; max-width: 440px; text-align: center; }
 
 .logo {
-  height: 56px;
-  width: auto;
-  opacity: 0.9;
-  margin: 0 auto 18px;
-  user-select: none;
+  height: 56px; width: auto; opacity: 0.9; margin: 0 auto 18px; user-select: none;
 }
 
 .card {
@@ -124,20 +98,8 @@ async function doLogin () {
   text-align: left;
 }
 
-.title {
-  margin: 0;
-  font-size: 22px;
-  font-weight: 600;
-  text-align: center;
-  color: #fff;
-}
-
-.subtitle {
-  margin: 6px 0 20px 0;
-  font-size: 13px;
-  color: rgba(255,255,255,0.7);
-  text-align: center;
-}
+.title { margin: 0; font-size: 22px; font-weight: 600; text-align: center; color: #fff; }
+.subtitle { margin: 6px 0 20px 0; font-size: 13px; color: rgba(255,255,255,0.7); text-align: center; }
 
 .field { margin-bottom: 14px; }
 .label { display: block; font-size: 13px; margin-bottom: 6px; color: rgba(255,255,255,0.85); }
@@ -145,72 +107,33 @@ async function doLogin () {
 .passrow { position: relative; }
 
 .input {
-  width: 100%;
-  padding: 11px 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.16);
-  background: rgba(255,255,255,0.06);
-  color: #fff;
-  outline: none;
-  transition: border .15s, box-shadow .15s, background .15s;
-  box-sizing: border-box;
+  width: 100%; padding: 11px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.06); color: #fff; outline: none; transition: border .15s, box-shadow .15s, background .15s; box-sizing: border-box;
 }
 .input::placeholder { color: rgba(255,255,255,0.45); }
-.input:focus {
-  border-color: rgba(255,255,255,0.35);
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.08);
-}
+.input:focus { border-color: rgba(255,255,255,0.35); box-shadow: 0 0 0 3px rgba(255,255,255,0.12); background: rgba(255,255,255,0.08); }
 
 .eye {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 30px;
-  padding: 0 10px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: rgba(255,255,255,0.75);
-  cursor: pointer;
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  height: 30px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; color: rgba(255,255,255,0.75); cursor: pointer;
 }
 
 .btn {
-  width: 100%;
-  margin-top: 6px;
-  padding: 12px 14px;
-  border: 0;
-  border-radius: 12px;
-  font-weight: 600;
-  background: #fff;
-  color: #0b0f1a;
-  cursor: pointer;
-  transition: transform .05s ease, box-shadow .15s ease, opacity .15s ease;
+  width: 100%; margin-top: 6px; padding: 12px 14px; border: 0; border-radius: 12px; font-weight: 600;
+  background: #fff; color: #0b0f1a; cursor: pointer; transition: transform .05s ease, box-shadow .15s ease, opacity .15s ease;
 }
 .btn:hover { box-shadow: 0 10px 24px rgba(0,0,0,0.25); }
 .btn:active { transform: translateY(1px); }
 .btn:disabled { opacity: .6; cursor: default; }
 
 .spinner {
-  width: 16px; height: 16px; border-radius: 50%;
-  border: 2px solid rgba(0,0,0,0.2); border-top-color: rgba(0,0,0,0.8);
-  display: inline-block; margin-right: 8px; vertical-align: -2px;
-  animation: spin 0.9s linear infinite;
+  width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.2); border-top-color: rgba(0,0,0,0.8);
+  display: inline-block; margin-right: 8px; vertical-align: -2px; animation: spin 0.9s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.error {
-  margin-top: 10px;
-  color: #fca5a5;
-  text-align: center;
-  font-size: 13px;
-}
+.error { margin-top: 10px; color: #fca5a5; text-align: center; font-size: 13px; }
 
-.tagline {
-  margin-top: 14px;
-  color: rgba(255,255,255,0.7);
-  font-size: 13px;
-}
+.tagline { margin-top: 14px; color: rgba(255,255,255,0.7); font-size: 13px; }
 .tagline strong { color: #fff; }
 </style>
