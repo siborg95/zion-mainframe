@@ -1,6 +1,7 @@
 ﻿const express = require("express");
 const path = require("path");
 const cors = require("cors");
+console.log('OPENAI key present:', !!process.env.OPENAI_API_KEY);
 
 // --- helpers
 const API_KEY = process.env.OPENAI_API_KEY;
