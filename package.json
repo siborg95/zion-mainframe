@@ -6,10 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "start": "node frontend-server.mjs"
+    "preview": "vite preview",
+    "start": "serve -s dist -l $PORT"
   },
   "dependencies": {
     "express": "^4.19.2",
+    "serve": "^14.2.3",
     "vue": "^3.4.0",
     "vue-router": "^4.3.3"
   },
