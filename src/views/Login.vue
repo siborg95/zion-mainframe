@@ -1,100 +1,36 @@
 ﻿<template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 flex items-center justify-center p-6">
-    <!-- build badge (optional) -->
-    <div v-if="buildLabel" class="fixed top-4 right-4 text-xs px-2.5 py-1 rounded-full bg-white/10 text-white/80 ring-1 ring-white/15">
-      BUILD {{ buildLabel }}
-    </div>
+  <div class="page">
+    <div class="badge" v-if="buildLabel">BUILD {{ buildLabel }}</div>
 
-    <div class="w-full max-w-md">
-      <!-- Logo -->
-      <div class="flex flex-col items-center mb-6">
-        <img
-          src="/neurosharp-logo.png"
-          alt="NeuroSharp"
-          class="h-14 w-auto opacity-90"
-          draggable="false"
-        />
-      </div>
+    <div class="wrap">
+      <img class="logo" src="/neurosharp-logo.png" alt="NeuroSharp" draggable="false" />
 
-      <!-- Card -->
-      <div class="rounded-2xl bg-white/10 backdrop-blur-xl shadow-2xl ring-1 ring-white/10 p-8">
-        <h1 class="text-white text-2xl font-semibold text-center">NeuroSharp Console</h1>
-        <p class="text-white/60 text-sm text-center mt-1 mb-6">Sign in to continue</p>
+      <div class="card">
+        <h1 class="title">NeuroSharp Console</h1>
+        <p class="subtitle">Sign in to continue</p>
 
-        <div class="space-y-4">
-          <!-- Username -->
-          <div>
-            <label class="block text-sm text-white/80 mb-1">Username</label>
-            <div class="relative">
-              <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                <!-- user icon -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 7.5a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0Z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5a7.5 7.5 0 0115 0" />
-                </svg>
-              </span>
-              <input
-                v-model="username"
-                type="text"
-                autocomplete="username"
-                placeholder="administrator"
-                class="w-full pl-10 pr-3 py-2.5 rounded-xl bg-white/5 text-white placeholder-white/30 border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/30"
-              />
-            </div>
-          </div>
-
-          <!-- Password -->
-          <div>
-            <label class="block text-sm text-white/80 mb-1">Password</label>
-            <div class="relative">
-              <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                <!-- lock icon -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V7.5a4.5 4.5 0 10-9 0v3" />
-                  <rect x="5.25" y="10.5" width="13.5" height="9" rx="2" />
-                </svg>
-              </span>
-              <input
-                :type="showPwd ? 'text' : 'password'"
-                v-model="password"
-                autocomplete="current-password"
-                placeholder="••••••••••••"
-                class="w-full pl-10 pr-10 py-2.5 rounded-xl bg-white/5 text-white placeholder-white/30 border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/30"
-              />
-              <button type="button" @click="showPwd = !showPwd" class="absolute inset-y-0 right-3 flex items-center text-white/60 hover:text-white transition">
-                <!-- eye icon -->
-                <svg v-if="!showPwd" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-7.5 9.75-7.5 9.75 7.5 9.75 7.5-3.75 7.5-9.75 7.5S2.25 12 2.25 12Z" />
-                  <circle cx="12" cy="12" r="3.75" />
-                </svg>
-                <!-- eye-off -->
-                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M6.45 6.6C3.9 8.4 2.25 12 2.25 12s3.75 7.5 9.75 7.5c2.07 0 3.9-.48 5.46-1.29M10.2 10.35A3.75 3.75 0 0015.6 15.8" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <!-- Submit -->
-          <button
-            :disabled="loading"
-            @click="doLogin"
-            class="w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-semibold bg-white text-gray-900 hover:bg-white/90 disabled:opacity-60 transition"
-          >
-            <svg v-if="loading" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
-              <path class="opacity-75" d="M4 12a8 8 0 018-8" stroke="currentColor" stroke-width="3"></path>
-            </svg>
-            <span>{{ loading ? 'Signing in…' : 'Sign in' }}</span>
-          </button>
-
-          <!-- Error -->
-          <p v-if="error" class="text-sm text-red-300 text-center">{{ error }}</p>
+        <div class="field">
+          <label class="label">Username</label>
+          <input class="input" v-model="username" type="text" placeholder="administrator" autocomplete="username" />
         </div>
+
+        <div class="field">
+          <label class="label">Password</label>
+          <div class="passrow">
+            <input class="input" :type="showPwd ? 'text' : 'password'" v-model="password" placeholder="••••••••••••" autocomplete="current-password" />
+            <button type="button" class="eye" @click="showPwd = !showPwd">{{ showPwd ? 'Hide' : 'Show' }}</button>
+          </div>
+        </div>
+
+        <button class="btn" :disabled="loading" @click="doLogin">
+          <span v-if="loading" class="spinner"></span>
+          <span>{{ loading ? 'Signing in…' : 'Sign in' }}</span>
+        </button>
+
+        <p v-if="error" class="error">{{ error }}</p>
       </div>
 
-      <!-- Tagline -->
-      <p class="mt-5 text-center text-white/60 text-sm select-none">Powered by <span class="text-white">Quantum Core</span></p>
+      <p class="tagline">Powered by <strong>Quantum Core</strong></p>
     </div>
   </div>
 </template>
@@ -113,7 +49,8 @@ const showPwd = ref(false)
 // optional build label (set VITE_BUILD in Railway if you want)
 const buildLabel = import.meta.env.VITE_BUILD || ''
 
-const API = import.meta.env.VITE_API_URL || ''  // must be set in Railway frontend
+// MUST be set in Railway (frontend service)
+const API = import.meta.env.VITE_API_URL || ''
 
 async function doLogin () {
   loading.value = true
@@ -135,3 +72,145 @@ async function doLogin () {
   }
 }
 </script>
+
+<style scoped>
+.page {
+  min-height: 100vh;
+  margin: 0;
+  background: radial-gradient(1200px 800px at 20% 10%, #1f2937 0%, rgba(17,24,39,0.9) 40%, #0b0f1a 100%),
+              linear-gradient(135deg, #0b0f1a 0%, #1a1f2b 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.badge {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  font-size: 11px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.85);
+  backdrop-filter: blur(8px);
+}
+
+.wrap {
+  width: 100%;
+  max-width: 440px;
+  text-align: center;
+}
+
+.logo {
+  height: 56px;
+  width: auto;
+  opacity: 0.9;
+  margin: 0 auto 18px;
+  user-select: none;
+}
+
+.card {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+  backdrop-filter: blur(12px);
+  text-align: left;
+}
+
+.title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  text-align: center;
+  color: #fff;
+}
+
+.subtitle {
+  margin: 6px 0 20px 0;
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  text-align: center;
+}
+
+.field { margin-bottom: 14px; }
+.label { display: block; font-size: 13px; margin-bottom: 6px; color: rgba(255,255,255,0.85); }
+
+.passrow { position: relative; }
+
+.input {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  outline: none;
+  transition: border .15s, box-shadow .15s, background .15s;
+  box-sizing: border-box;
+}
+.input::placeholder { color: rgba(255,255,255,0.45); }
+.input:focus {
+  border-color: rgba(255,255,255,0.35);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.08);
+}
+
+.eye {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 30px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255,255,255,0.75);
+  cursor: pointer;
+}
+
+.btn {
+  width: 100%;
+  margin-top: 6px;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 12px;
+  font-weight: 600;
+  background: #fff;
+  color: #0b0f1a;
+  cursor: pointer;
+  transition: transform .05s ease, box-shadow .15s ease, opacity .15s ease;
+}
+.btn:hover { box-shadow: 0 10px 24px rgba(0,0,0,0.25); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: .6; cursor: default; }
+
+.spinner {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid rgba(0,0,0,0.2); border-top-color: rgba(0,0,0,0.8);
+  display: inline-block; margin-right: 8px; vertical-align: -2px;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.error {
+  margin-top: 10px;
+  color: #fca5a5;
+  text-align: center;
+  font-size: 13px;
+}
+
+.tagline {
+  margin-top: 14px;
+  color: rgba(255,255,255,0.7);
+  font-size: 13px;
+}
+.tagline strong { color: #fff; }
+</style>
