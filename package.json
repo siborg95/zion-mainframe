@@ -12,7 +12,7 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.19.2",
-    "serve": "^14.2.3",
+    "serve": "^14.2.4",
     "vue": "^3.5.18",
     "vue-router": "^4.5.1"
   },
