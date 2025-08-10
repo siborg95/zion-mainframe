@@ -2,67 +2,46 @@
   <div class="login">
     <h1>Login</h1>
 
-    <div class="field">
-      <label>Username</label>
-      <input v-model="username" placeholder="administrator" />
-    </div>
+    <form @submit.prevent="handleLogin">
+      <div class="field">
+        <label>Username</label>
+        <input v-model="username" autocomplete="username" />
+      </div>
 
-    <div class="field">
-      <label>Password</label>
-      <input v-model="password" type="password" placeholder="••••••••" />
-    </div>
+      <div class="field">
+        <label>Password</label>
+        <input v-model="password" type="password" autocomplete="current-password" />
+      </div>
 
-    <button @click="login" :disabled="loading">
-      {{ loading ? 'Logging in…' : 'Login' }}
-    </button>
+      <button type="submit" :disabled="loading">
+        {{ loading ? 'Logging in…' : 'Login' }}
+      </button>
 
-    <p v-if="error" class="error">{{ error }}</p>
+      <p v-if="error" class="error">{{ error }}</p>
+    </form>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { login as apiLogin } from '../lib/api'
 
 const router = useRouter()
-
-// 👇 your live backend API
-const API = 'https://zion-mainframe-backend-production.up.railway.app'
-
-const username = ref('administrator') // prefill for convenience
+const username = ref('')
 const password = ref('')
 const loading = ref(false)
 const error = ref('')
 
-async function login() {
+async function handleLogin () {
   error.value = ''
-  if (!username.value || !password.value) {
-    error.value = 'Please enter both fields'
-    return
-  }
   loading.value = true
   try {
-    const resp = await fetch(`${API}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username: username.value,
-        password: password.value
-      })
-    })
-    const data = await resp.json().catch(() => ({}))
-    if (!resp.ok || !data?.success) {
-      error.value = data?.message || 'Invalid credentials'
-      return
-    }
-
-    // minimal session: store who logged in
-    localStorage.setItem('userEmail', data.username || username.value)
-
-    // go to console
+    const data = await apiLogin(username.value, password.value)
+    localStorage.setItem('token', data.token || '')
     router.push('/console')
   } catch (e) {
-    error.value = 'Network error: ' + (e?.message || e)
+    error.value = e.message || 'Login failed'
   } finally {
     loading.value = false
   }
@@ -70,9 +49,27 @@ async function login() {
 </script>
 
 <style scoped>
-.login { max-width: 360px; margin: 6rem auto; display: grid; gap: 1rem; }
-.field { display: grid; gap: .25rem; }
-input { padding: .6rem .75rem; border: 1px solid #ccc; border-radius: 8px; }
-button { padding: .7rem 1rem; border: none; border-radius: 8px; cursor: pointer; }
-.error { color: #c0392b; }
+.login {
+  max-width: 420px;
+  margin: 4rem auto;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+  background: #fff;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+h1 { margin: 0 0 1rem; font-size: 1.5rem; }
+.field { margin-bottom: 1rem; }
+label { display: block; margin-bottom: 0.25rem; font-weight: 600; }
+input {
+  width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #d0d7de;
+  border-radius: 8px; outline: none;
+}
+input:focus { border-color: #0969da; box-shadow: 0 0 0 3px rgba(9,105,218,.15); }
+button {
+  width: 100%; padding: 0.7rem 1rem; border: 0; border-radius: 8px;
+  cursor: pointer; font-weight: 600;
+}
+button[disabled] { opacity: .6; cursor: not-allowed; }
+.error { color: #b00020; margin-top: .75rem; }
 </style>
