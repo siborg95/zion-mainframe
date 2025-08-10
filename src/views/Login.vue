@@ -5,7 +5,6 @@
 
       <div class="card">
         <h1 class="title">Welcome to NeuroSharp Cloud</h1>
-        <p class="subtitle">Sign in to continue</p>
 
         <div class="field">
           <label class="label">Username</label>
@@ -85,7 +84,7 @@ async function doLogin () {
 .wrap { width: 100%; max-width: 440px; text-align: center; }
 
 .logo {
-  width: clamp(160px, 40vw, 280px); /* responsive width */
+  width: clamp(160px, 40vw, 280px);
   height: auto;
   opacity: 0.9;
   margin: 0 auto 20px;
@@ -104,7 +103,6 @@ async function doLogin () {
 }
 
 .title { margin: 0; font-size: 22px; font-weight: 600; text-align: center; color: #fff; }
-.subtitle { margin: 6px 0 20px 0; font-size: 13px; color: rgba(255,255,255,0.7); text-align: center; }
 
 .field { margin-bottom: 14px; }
 .label { display: block; font-size: 13px; margin-bottom: 6px; color: rgba(255,255,255,0.85); }
