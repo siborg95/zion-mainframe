@@ -9,7 +9,13 @@
       </button>
     </div>
 
-    <pre v-if="reply" class="reply">{{ reply }}</pre>
+    <pre class="reply" v-if="reply">{{ reply }}</pre>
+
+    <div class="debug">
+      <div><strong>Status:</strong> {{ lastStatus ?? '—' }}</div>
+      <div class="url"><strong>URL:</strong> {{ lastURL || '—' }}</div>
+      <div><strong>Error:</strong> {{ lastError || '—' }}</div>
+    </div>
 
     <button class="logout" @click="logout">Logout</button>
   </div>
@@ -17,21 +23,44 @@
 
 <script setup>
 import { ref } from 'vue'
-import { askGPT } from '../lib/api'
 import { useRouter } from 'vue-router'
+import { API } from '../lib/api'
 
 const router = useRouter()
 const prompt = ref('')
 const reply = ref('')
 const loading = ref(false)
+const lastStatus = ref(null)
+const lastURL = ref('')
+const lastError = ref('')
 
 async function send () {
   loading.value = true
   reply.value = ''
+  lastError.value = ''
+  lastStatus.value = null
+  lastURL.value = `${API}/gpt`
+
   try {
-    reply.value = await askGPT(prompt.value)
+    const res = await fetch(lastURL.value, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: prompt.value })
+    })
+
+    lastStatus.value = res.status
+    const data = await res.json().catch(() => ({}))
+
+    if (res.ok && data && data.ok) {
+      reply.value = data.text || '(empty response)'
+    } else {
+      reply.value = `Error [${res.status}]: ${data?.error || 'Unknown error'}`
+      lastError.value = data?.error || `HTTP ${res.status}`
+    }
   } catch (e) {
-    reply.value = `Error: ${e.message || e}`
+    lastError.value = e?.message || String(e)
+    reply.value = `Network error: ${lastError.value}`
+    lastStatus.value = '(failed)'
   } finally {
     loading.value = false
   }
@@ -50,5 +79,7 @@ textarea { width: 100%; padding: .6rem .75rem; border: 1px solid #d0d7de; border
 textarea:focus { border-color: #0969da; box-shadow: 0 0 0 3px rgba(9,105,218,.15); }
 button { padding: .6rem 1rem; border: 0; border-radius: 8px; cursor: pointer; font-weight: 600; }
 .reply { margin-top: 1rem; background: #f6f8fa; padding: .75rem; border-radius: 8px; white-space: pre-wrap; }
+.debug { margin-top: 1rem; font-size: .9rem; color: #444; }
+.debug .url { word-break: break-all; }
 .logout { margin-top: 1rem; background: #eee; }
 </style>
