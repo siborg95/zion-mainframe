@@ -1,6 +1,7 @@
-﻿const express = require("express");
-const cors = require("cors");
-const consoleRouter = require("./routes/console"); // inside server/routes
+﻿// server.js  (ESM)
+import express from "express";
+import cors from "cors";
+import consoleRouter from "./routes/console.js";
 
 const app = express();
 
@@ -8,13 +9,10 @@ const app = express();
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 
-// mount console endpoints
+// routes
 app.use("/", consoleRouter);
-
-// health
 app.get("/", (_req, res) => res.json({ ok: true, service: "backend" }));
 
+// start
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`API listening on ${PORT}`);
-});
+app.listen(PORT, "0.0.0.0", () => console.log(`API listening on ${PORT}`));
