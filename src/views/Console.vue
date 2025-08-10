@@ -16,7 +16,13 @@
     </section>
 
     <form class="composer" @submit.prevent="send">
-      <textarea v-model="text" rows="3" placeholder="Ask GPT…" :disabled="sending"></textarea>
+      <textarea
+        v-model="text"
+        rows="3"
+        placeholder="Ask Oracle…"
+        aria-label="Ask Oracle"
+        :disabled="sending"
+      ></textarea>
       <button type="submit" :disabled="sending || !text.trim()">
         {{ sending ? 'Sending…' : 'Send' }}
       </button>
