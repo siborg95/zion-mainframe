@@ -85,7 +85,12 @@ async function doLogin () {
 .wrap { width: 100%; max-width: 440px; text-align: center; }
 
 .logo {
-  height: 56px; width: auto; opacity: 0.9; margin: 0 auto 18px; user-select: none;
+  width: 280px;           /* resized */
+  height: auto;
+  opacity: 0.9;
+  margin: 0 auto 20px;    /* spacing */
+  user-select: none;
+  display: block;         /* center reliably */
 }
 
 .card {
